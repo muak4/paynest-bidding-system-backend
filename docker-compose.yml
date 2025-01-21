@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # db
+  db:
+    image: postgres:15
+    container_name: postgres_paynest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Backend service
+  backend:
+    build:
+      context: . # Root of your backend project
+      dockerfile: Dockerfile
+    container_name: nestjs_backend_paynest
+    restart: always
+    ports:
+      - '3001:3001' # Map container port 3001 to host port 3001
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
