@@ -11,6 +11,7 @@ The Bidding System Backend is built using [NestJS](https://nestjs.com/) and prov
 - [Getting Started](#getting-started)
   - [Running Locally](#running-locally)
   - [Running with Docker](#running-with-docker)
+- [API Usage](#api-usage)
 - [Seeding Data](#seeding-data)
 - [License](#license)
 
@@ -91,7 +92,7 @@ FRONTEND_APP_URL=http://localhost:3000
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-repo/bidding-system-backend.git
+   git clone git@github.com:muak4/paynest-bidding-system-backend.git
    cd bidding-system-backend
    ```
 2. **Install Dependencies**:
@@ -121,6 +122,21 @@ FRONTEND_APP_URL=http://localhost:3000
    ```bash
    docker compose down
    ```
+
+---
+
+## API Usage
+
+To create item call Post API `localhost:3001/item`
+
+```bash
+{
+  "name": "Lenovo Thinkpad",
+  "description": "Slickest & Powerful",
+  "startingPrice": 2000,
+  "duration": 3600
+}
+```
 
 ---
 
