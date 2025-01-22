@@ -6,26 +6,45 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: (origin, callback) => {
+      const configService = new ConfigService();
+      const frontendAppUrl = configService.get<string>(
+        'FRONTEND_APP_URL',
+        'http://localhost:3030',
+      );
+
+      if (origin === frontendAppUrl || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true,
   },
 })
 export class BidGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: Socket) {
-    // console.log(`Client connected: ${client.id}`);
-  }
+  constructor(private configService: ConfigService) {}
 
-  handleDisconnect(client: Socket) {
-    // console.log(`Client disconnected: ${client.id}`);
-  }
+  handleConnection(client: Socket) {}
+
+  handleDisconnect(client: Socket) {}
 
   broadcastHighestBid(itemId: number, highestBid: number) {
-    // console.log('Broadcast: ', itemId, highestBid);
     this.server.emit('bidUpdate', { itemId, highestBid });
+  }
+
+  @SubscribeMessage('connected')
+  handleConnectionMessage(client: Socket) {
+    const origin = this.configService.get<string>('FRONTEND_APP_URL');
+    console.log('Origin:', origin); // Check if it resolves correctly
   }
 }
