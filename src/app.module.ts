@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { EpisodesModule } from './episodes/episodes.module';
 import { UsersModule } from './users/users.module';
 import { ItemsModule } from './items/items.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -39,7 +38,6 @@ import { SeedService } from './seed.service';
     ItemsModule,
     UsersModule,
     BidsModule,
-    EpisodesModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

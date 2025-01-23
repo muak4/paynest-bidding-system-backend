@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserLoginDto } from './dto/user-login.dto';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -24,6 +27,10 @@ export class UsersController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login user with username and password' })
+  @ApiBody({
+    type: UserLoginDto,
+  })
   async login(
     @Body() loginDto: { username: string; password: string },
   ): Promise<{ message: string; user: any }> {

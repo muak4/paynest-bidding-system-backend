@@ -11,7 +11,9 @@ The Bidding System Backend is built using [NestJS](https://nestjs.com/) and prov
 - [Getting Started](#getting-started)
   - [Running Locally](#running-locally)
   - [Running with Docker](#running-with-docker)
+- [API Documentation](#api-documentation)
 - [API Usage](#api-usage)
+- [Deployment](#deployment)
 - [Seeding Data](#seeding-data)
 - [License](#license)
 
@@ -125,6 +127,26 @@ FRONTEND_APP_URL=http://localhost:3000
 
 ---
 
+## API Documentation
+
+The backend API is documented using Swagger, providing an interactive UI for developers to explore and test the available API endpoints.
+
+### Accessing the Swagger UI
+
+Once the application is running, you can access the Swagger UI by navigating to the following URL in your browser:
+
+```bash
+http://localhost:3001/api-docs
+```
+
+or on prod version
+
+```bash
+https://paynest-bidding-system-backend.onrender.com/api-docs
+```
+
+---
+
 ## API Usage
 
 To create item call Post API `localhost:3001/item`
@@ -137,6 +159,16 @@ To create item call Post API `localhost:3001/item`
   "duration": 3600
 }
 ```
+
+---
+
+## Deployment
+
+This repo is configured with [Render](https://render.com/). It automatically detects a push to the `main` branch and starts the deployment process.
+
+You can monitor the deployment status and view the live application through the Render dashboard here:
+
+[Render Dashboard](https://dashboard.render.com)
 
 ---
 
