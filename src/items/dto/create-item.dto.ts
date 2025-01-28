@@ -33,4 +33,12 @@ export class CreateItemDto {
   @IsNotEmpty()
   @IsNumber()
   duration: number;
+
+  @ApiProperty({
+    description: 'User ID of the person creating the item',
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  createdBy: number;
 }

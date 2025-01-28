@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Item } from './entities/item.entity';
 import { Bid } from 'src/bids/entities/bid.entity';
+import { User } from 'src/users/entities/user.entity';
+import { CreateItemDto } from './dto/create-item.dto';
 
 @Injectable()
 export class ItemsService {
@@ -11,28 +13,49 @@ export class ItemsService {
     private readonly itemRepository: Repository<Item>,
     @InjectRepository(Bid)
     private bidRepository: Repository<Bid>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async createItem(data: Partial<Item>): Promise<Item> {
-    // const item = this.itemRepository.create(data);
+  async createItem(data: CreateItemDto): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { id: data.createdBy },
+    });
+
+    if (!user) {
+      throw new Error('User not found'); // Handle user not found scenario
+    }
+
     const item = this.itemRepository.create({
       ...data,
-      createdAt: new Date().toISOString(), // Ensure UTC time
+      createdAt: new Date(),
+      createdBy: user,
     });
-    return this.itemRepository.save(item);
+
+    const savedItem = await this.itemRepository.save(item);
+
+    return {
+      id: savedItem.id,
+      name: savedItem.name,
+      description: savedItem.description,
+      startingPrice: savedItem.startingPrice,
+      duration: savedItem.duration,
+      createdAt: savedItem.createdAt,
+      createdBy: savedItem.createdBy.id,
+    };
   }
 
   async getAllItems(): Promise<Item[]> {
     return this.itemRepository.find();
   }
 
-  async getItemById(id: number): Promise<Item> {
+  async getItemById(id: number): Promise<any> {
     const currentDate = new Date();
 
-    // Fetch the item details
-    const item = await this.itemRepository.findOne({ where: { id } });
+    const item = await this.itemRepository.findOne({
+      where: { id },
+      relations: ['createdBy'],
+    });
 
-    // Fetch the highest bid for this item
     const highestBid = await this.bidRepository
       .createQueryBuilder('bid')
       .leftJoinAndSelect('bid.item', 'item')
@@ -52,7 +75,10 @@ export class ItemsService {
 
     item['duration'] = Math.max(0, Math.floor(remainingTime));
 
-    return item;
+    return {
+      ...item,
+      createdBy: item.createdBy.id,
+    };
   }
 
   async getAvailableItems(): Promise<any[]> {

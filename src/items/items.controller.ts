@@ -15,7 +15,7 @@ export class ItemsController {
     description: 'Item data to create a new auction item',
     type: CreateItemDto,
   })
-  async createItem(@Body() data: Partial<Item>): Promise<Item> {
+  async createItem(@Body() data: CreateItemDto): Promise<Item> {
     return this.itemsService.createItem(data);
   }
 

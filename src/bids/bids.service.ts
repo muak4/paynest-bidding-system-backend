@@ -29,7 +29,10 @@ export class BidsService {
     amount: number,
   ): Promise<PlaceBidResponseDto> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    const item = await this.itemRepository.findOne({ where: { id: itemId } });
+    const item = await this.itemRepository.findOne({
+      where: { id: itemId },
+      relations: ['createdBy'],
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -39,7 +42,10 @@ export class BidsService {
       throw new NotFoundException('Item not found');
     }
 
-    // Ensure the auction is still ongoing
+    if (item.createdBy.id === userId) {
+      throw new ForbiddenException('You cannot bid on your own item');
+    }
+
     const currentTime = new Date().getTime();
     const auctionEndTime =
       new Date(item.createdAt).getTime() + item.duration * 1000;
@@ -47,14 +53,12 @@ export class BidsService {
       throw new ForbiddenException('Auction has ended');
     }
 
-    // Fetch the current highest bid for the item from Bid table
     const highestBid = await this.bidRepository
       .createQueryBuilder('bid')
       .where('bid.itemId = :itemId', { itemId })
       .orderBy('bid.amount', 'DESC')
       .getOne();
 
-    // Ensure the bid is higher than the current highest bid
     if (
       (highestBid && amount <= highestBid.amount) ||
       amount < item.startingPrice
@@ -64,7 +68,6 @@ export class BidsService {
       );
     }
 
-    // Create and save the bid
     const bid = this.bidRepository.create({
       amount,
       user,
@@ -73,7 +76,6 @@ export class BidsService {
 
     await this.bidRepository.save(bid);
 
-    // Notify clients of the new highest bid
     this.bidGateway.broadcastHighestBid(itemId, bid.amount);
 
     return {
